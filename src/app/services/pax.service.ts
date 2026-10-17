@@ -1,0 +1,156 @@
+import {Injectable} from '@angular/core';
+import {Parent, Pax, PaxOrigin} from 'types';
+
+import {BASE_URL} from '../../../constants';
+
+import {HttpService} from './http.service';
+
+const URL = `${BASE_URL}/pax/`;
+
+interface PaxTreeNode {
+  pax_name: string;
+  slack_id?: string;
+  parent: null|Parent;
+}
+
+interface PaxTree {
+  [key: string]: {pax_name: string, parent: Parent};
+}
+
+@Injectable({providedIn: 'root'})
+export class PaxService {
+  allData?: Pax[];
+  paxMap: Map<string, Pax> = new Map<string, Pax>();
+  parentMap: Map<string, Parent> = new Map<string, Parent>();
+  childrenMap: Map<string, string[]> = new Map<string, string[]>();
+
+  // if multiple callers want all the pax data, respond with this promise
+  private currentPromise?: Promise<Pax[]>;
+
+  constructor(
+      private readonly http: HttpService,
+  ) {
+    this.loadPaxData();
+    this.loadPaxTree();
+  }
+
+  async loadPaxData(): Promise<Pax[]> {
+    this.allData = await this.http.get(URL + 'all') as Pax[];
+    this.allData.forEach(pax => {
+      this.paxMap.set(pax.name.toLowerCase(), pax);
+    });
+    return this.allData;
+  }
+
+  async loadPaxTree(): Promise<PaxTree> {
+    const tree = await this.http.get(URL + 'tree') as PaxTree;
+    this.parentMap.clear();
+    this.childrenMap.clear();
+    for (const {pax_name, parent} of Object.values(tree)) {
+      this.parentMap.set(pax_name, parent);
+      if (parent?.type === PaxOrigin.PAX && parent.name) {
+        const key = parent.name.toLowerCase();
+        const children = this.childrenMap.get(key) ?? [];
+        children.push(pax_name.toLowerCase());
+        this.childrenMap.set(key, children);
+      }
+    }
+    return tree;
+  }
+
+  /**
+   * How many PAX this HIM has invited: directs are their own invites,
+   * descendants counts their entire family tree below them.
+   */
+  async getInvitedFamily(name: string):
+      Promise<{directs: number, descendants: number}> {
+    if (this.parentMap.size === 0) await this.loadPaxTree();
+
+    const key = name.toLowerCase();
+    const directs = this.childrenMap.get(key)?.length ?? 0;
+
+    let descendants = 0;
+    const seen = new Set<string>([key]);  // guards against bad-data cycles
+    const stack = [...this.childrenMap.get(key) ?? []];
+    while (stack.length > 0) {
+      const next = stack.pop()!;
+      if (seen.has(next)) continue;
+      seen.add(next);
+      descendants++;
+      stack.push(...this.childrenMap.get(next) ?? []);
+    }
+
+    return {directs, descendants};
+  }
+
+  getAllData(): Promise<Pax[]> {
+    if (this.currentPromise) {
+      return this.currentPromise;
+    } else {
+      this.currentPromise = this.loadPaxData();
+      return this.currentPromise;
+    }
+  }
+
+  async getPax(name: string): Promise<Pax|undefined> {
+    if (!this.allData) await this.getAllData();
+    return this.paxMap.get(name.toLowerCase());
+  }
+
+  async getPaxByEmail(email: string): Promise<Pax|undefined> {
+    if (!this.allData) await this.getAllData();
+    return this.allData?.find(
+        pax =>
+            pax.email?.toLowerCase()?.trim() === email.toLowerCase()?.trim());
+  }
+
+  async getParent(name: string, reload = false): Promise<Parent|undefined> {
+    if (this.parentMap.size === 0 || reload) await this.loadPaxTree();
+    return this.parentMap.get(name.toLowerCase());
+  }
+
+  async setParent(name: string, invitedBy: string): Promise<Pax[]> {
+    const {id = ''} = await this.getPax(name) || {} as Pax;
+
+    let type = PaxOrigin.PAX;
+    let parentName = invitedBy;
+    let {id: parentSlackId} = await this.getPax(parentName) || {} as Pax;
+
+    if (this.isPaxOrigin(invitedBy)) {
+      type = invitedBy as PaxOrigin;
+      parentName = '';
+      parentSlackId = '';
+    }
+
+    const body: PaxTreeNode = {
+      pax_name: name,
+      slack_id: id,
+      parent: {
+        type,
+        name: parentName,
+        slackId: parentSlackId,
+      },
+    };
+    await this.http.post(URL + 'set-pax-parent', body);
+    return this.loadPaxData();
+  }
+
+  getOriginLabel(origin: PaxOrigin): string {
+    switch (origin) {
+      case PaxOrigin.AT_BD:
+        return 'EH\'ed at/during BD';
+      case PaxOrigin.DR_EH:
+        return 'EH\'ed from DR PAX';
+      case PaxOrigin.MOVED:
+        return 'Moved from DR';
+      case PaxOrigin.ONLINE:
+        return 'Found F3 online';
+      default:
+        return '';
+    }
+  }
+
+  isPaxOrigin(text: string): boolean {
+    return Object.values(PaxOrigin).map(String).includes(text);
+  }
+}

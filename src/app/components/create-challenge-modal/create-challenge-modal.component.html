@@ -1,0 +1,203 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Edit Challenge' : 'Create Challenge' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="create-challenge-content">
+    <p>{{ isEditMode ? 'Update the challenge details, metrics, and sorting.' : 'Set up a challenge with tracking metrics and leaderboard sorting.' }}</p>
+
+    <ion-item>
+      <ion-label position="stacked">Challenge Name *</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="name"
+        placeholder="e.g., Summer 2024 Challenge"
+        [disabled]="isLoading">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Description *</ion-label>
+      <ion-textarea
+        [(ngModel)]="description"
+        placeholder="Describe the challenge..."
+        rows="2"
+        auto-grow="true"
+        [disabled]="isLoading">
+      </ion-textarea>
+    </ion-item>
+
+    <div class="date-inputs">
+      <ion-item>
+        <ion-label position="stacked">Start Date *</ion-label>
+        <input
+          type="date"
+          [(ngModel)]="startDate"
+          [max]="endDate || undefined"
+          [disabled]="isLoading"
+          class="date-input">
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">End Date *</ion-label>
+        <input
+          type="date"
+          [(ngModel)]="endDate"
+          [min]="startDate || undefined"
+          [disabled]="isLoading"
+          class="date-input">
+      </ion-item>
+    </div>
+
+    <div class="privacy-section">
+      <ion-item>
+        <ion-label>
+          <h3>Privacy</h3>
+          <p>Private challenges are only visible to you and participants</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="isPrivate"
+          [disabled]="isLoading">
+        </ion-toggle>
+      </ion-item>
+    </div>
+
+    <div class="joining-section">
+      <ion-item>
+        <ion-label>
+          <h3>Require Joining</h3>
+          <p>When enabled, PAX must join to appear on the leaderboard. When disabled, all PAX with activity are automatically included.</p>
+        </ion-label>
+        <ion-toggle
+          [(ngModel)]="requireJoining"
+          [disabled]="isLoading">
+        </ion-toggle>
+      </ion-item>
+    </div>
+
+    <div class="metrics-section">
+      <h3>Metrics to Track</h3>
+      <p class="section-description">Select which metrics should be tracked in the leaderboard:</p>
+
+      <ion-item class="metric-item">
+        <ion-checkbox
+          [(ngModel)]="metrics.bds"
+          (ionChange)="onMetricChange()"
+          [disabled]="isLoading"
+          slot="start">
+        </ion-checkbox>
+        <ion-label class="metric-label">
+          <h2># of BDs</h2>
+          <p>Total number of beatdowns attended</p>
+        </ion-label>
+        <ion-input
+          *ngIf="metrics.bds"
+          type="number"
+          [(ngModel)]="goals.bds"
+          placeholder="Goal"
+          min="1"
+          class="goal-input"
+          [disabled]="isLoading"
+          slot="end">
+        </ion-input>
+      </ion-item>
+
+      <ion-item class="metric-item">
+        <ion-checkbox
+          [(ngModel)]="metrics.uniqueAos"
+          (ionChange)="onMetricChange()"
+          [disabled]="isLoading"
+          slot="start">
+        </ion-checkbox>
+        <ion-label class="metric-label">
+          <h2>Unique # of AOs</h2>
+          <p>Number of unique AOs visited</p>
+        </ion-label>
+        <ion-input
+          *ngIf="metrics.uniqueAos"
+          type="number"
+          [(ngModel)]="goals.uniqueAos"
+          placeholder="Goal"
+          min="1"
+          class="goal-input"
+          [disabled]="isLoading"
+          slot="end">
+        </ion-input>
+      </ion-item>
+
+      <ion-item class="metric-item">
+        <ion-checkbox
+          [(ngModel)]="metrics.qs"
+          (ionChange)="onMetricChange()"
+          [disabled]="isLoading"
+          slot="start">
+        </ion-checkbox>
+        <ion-label class="metric-label">
+          <h2># of Qs</h2>
+          <p>Total number of beatdowns led</p>
+        </ion-label>
+        <ion-input
+          *ngIf="metrics.qs"
+          type="number"
+          [(ngModel)]="goals.qs"
+          placeholder="Goal"
+          min="1"
+          class="goal-input"
+          [disabled]="isLoading"
+          slot="end">
+        </ion-input>
+      </ion-item>
+
+      <ion-item class="metric-item">
+        <ion-checkbox
+          [(ngModel)]="metrics.doubleDowns"
+          (ionChange)="onMetricChange()"
+          [disabled]="isLoading"
+          slot="start">
+        </ion-checkbox>
+        <ion-label class="metric-label">
+          <h2># of DDs</h2>
+          <p>Total number of double downs</p>
+        </ion-label>
+        <ion-input
+          *ngIf="metrics.doubleDowns"
+          type="number"
+          [(ngModel)]="goals.doubleDowns"
+          placeholder="Goal"
+          min="1"
+          class="goal-input"
+          [disabled]="isLoading"
+          slot="end">
+        </ion-input>
+      </ion-item>
+    </div>
+
+    <div class="sort-section" *ngIf="availableSortOptions.length > 1">
+      <h3>Sort Leaderboard By</h3>
+      <p class="section-description">Choose which metric to use for sorting the leaderboard:</p>
+
+      <ion-radio-group [(ngModel)]="sortBy">
+        <ion-item *ngFor="let option of availableSortOptions">
+          <ion-radio [value]="option.value" [disabled]="isLoading">
+          </ion-radio>
+          <ion-label class="space-before">{{ option.label }}</ion-label>
+        </ion-item>
+      </ion-radio-group>
+    </div>
+
+    <ion-button
+      expand="block"
+      (click)="createChallenge()"
+      [disabled]="isFormInvalid">
+      <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+      <span *ngIf="!isLoading">{{ isEditMode ? 'Update Challenge' : 'Create Challenge' }}</span>
+    </ion-button>
+  </div>
+</ion-content>

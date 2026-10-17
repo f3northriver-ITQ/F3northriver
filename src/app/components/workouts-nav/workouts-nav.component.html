@@ -1,0 +1,11 @@
+<nav class="workouts-nav" aria-label="Workouts">
+  <button
+    type="button"
+    class="view"
+    *ngFor="let view of views"
+    [class.selected]="view.route === current"
+    [attr.aria-current]="view.route === current ? 'page' : null"
+    (click)="go(view.route)">
+    {{ view.label }}
+  </button>
+</nav>

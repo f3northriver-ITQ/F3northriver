@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /** Legacy app data — keep permissive reads for public pages */
+    match /challenges/{challengeId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    match /challenge_participants/{participantId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasAdminRole(uid) {
+      return signedIn() &&
+          exists(/databases/$(database)/documents/userProfiles/$(uid)) &&
+          get(/databases/$(database)/documents/userProfiles/$(uid)).data.roles is list &&
+          'admin' in get(/databases/$(database)/documents/userProfiles/$(uid)).data.roles;
+    }
+
+    function isBootstrapSuperadmin() {
+      return signedIn() &&
+          request.auth.token.email == 'taylor.matt777@gmail.com';
+    }
+
+    /**
+     * True when the actor holds any Nantan role for the Boise-area regions.
+     * Checks the known region IDs — update if new regions are added.
+     */
+    function hasNantanRole(uid) {
+      return signedIn() &&
+          exists(/databases/$(database)/documents/userProfiles/$(uid)) &&
+          get(/databases/$(database)/documents/userProfiles/$(uid)).data.roles is list &&
+          get(/databases/$(database)/documents/userProfiles/$(uid)).data.roles.hasAny([
+            'nantan:49583',
+            'nantan:45177',
+            'nantan:45176',
+            'nantan:50162'
+          ]);
+    }
+
+    /** Admins, bootstrap superadmin, or any Nantan may write pending docs. */
+    function isElevatedActor(uid) {
+      return hasAdminRole(uid) || isBootstrapSuperadmin() || hasNantanRole(uid);
+    }
+
+    match /userProfiles/{uid} {
+      allow read: if signedIn();
+
+      /** Created on first login merge from the app */
+      allow create: if signedIn() && request.auth.uid == uid;
+
+      /** Self can update non-role fields; admins / bootstrap can set roles */
+      allow update: if signedIn() && (
+          request.auth.uid == uid ||
+          hasAdminRole(request.auth.uid) ||
+          isBootstrapSuperadmin()
+      );
+    }
+
+    /**
+     * Pending role assignments — email-keyed, written by elevated actors and
+     * consumed by the mergePendingRoles Cloud Function (Admin SDK bypasses rules).
+     */
+    match /pendingRoleAssignments/{email} {
+      /** Any signed-in user can read their own pending assignment. */
+      allow read: if signedIn();
+
+      /** Admins, bootstrap superadmin, and Nantans can create/update pending docs. */
+      allow create, update: if isElevatedActor(request.auth.uid);
+
+      /** Same actors can delete (e.g. cancel a pending assignment). */
+      allow delete: if isElevatedActor(request.auth.uid);
+    }
+
+    /** Default: deny until a collection is enumerated above */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

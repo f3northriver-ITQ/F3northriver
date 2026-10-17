@@ -1,0 +1,536 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+/* Safe Area Insets for Mobile Safari */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+  /* F3 brand accent, used for links and highlighted actions */
+  --f3-red: #ee6059;
+}
+
+/* This is an app, not a page: never pinch- or double-tap-zoom the whole UI.
+   Components that zoom themselves (maps) opt back in with their own
+   touch-action; Safari additionally needs the gesture guard in page-zoom.ts. */
+html,
+body {
+  touch-action: pan-x pan-y;
+}
+
+/* Fix for mobile Safari - ensure ion-content can scroll to bottom */
+ion-content {
+  --padding-bottom: calc(var(--safe-area-inset-bottom) + 20px);
+}
+
+/* Sidebar toggle visibility - hide when back button is available */
+// Ionic adds a "can-go-back" class to the page which the
+// ionic-back-button uses this to determine if it should
+// be visible. Hide our custom back in that case
+.can-go-back .custom-back {
+  visibility: hidden;
+  display: none;
+}
+
+@font-face {
+  font-family: 'BlackOps';
+  src: url('assets/BlackOpsOne-Regular.ttf');
+}
+.black-ops {
+  font-family: 'BlackOps';
+}
+
+.font-1 {
+  font-size: 18px;
+  line-height: 20px;
+}
+.font-2 {
+  font-size: 28px;
+}
+.font-3 {
+  font-size: 42px;
+}
+.font-4 {
+  font-size: 56px;
+}
+.font-5 {
+  font-size: 70px;
+}
+
+.center-container,
+.empty-container,
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  min-height: 100px;
+  width: 100%;
+  font-size: 20px;
+
+  &.full-screen {
+    height: 100%;
+  }
+}
+
+.top-container {
+  position: fixed;
+  height: 100vh; /* Fallback for browsers that don't support dvh */
+  height: 100dvh; /* Use dynamic viewport height for mobile Safari */
+  width: 100vw;
+  background: rgb(0,0,0);
+  background: radial-gradient(circle, rgba(0,0,0,0.6432948179271709) 0%, rgba(0,0,0,1) 100%);
+
+  .main-img {
+    background: url('assets/home.jpeg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+    color: #fff;
+    text-align: center;
+    position: relative;
+
+    h1 {
+      font-size: 120px;
+      line-height: 1.2;
+      text-transform: uppercase;
+      font-family: Montserrat, Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      text-shadow: 0px 0px 15px #7f7f7f;
+      max-width: 1000px;
+    }
+
+    h2 {
+      text-transform: uppercase;
+      font-size: 44px;
+      text-shadow: 0px 0px 15px #7f7f7f;
+      font-weight: bold;
+    }
+  }
+}
+
+.content {
+  position: absolute;
+  width: 100%;
+  color: #fff;
+  padding-top: 95vh;
+
+  app-header {
+    position: absolute;
+    top: 0;
+  }
+
+  .section {
+    text-align: center;
+    padding: 50px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.4em;
+
+    &:nth-child(even) { background-color: #25292b; }
+    &:nth-child(odd) { background-color: #1e2123; }
+
+    ion-button {
+      --ion-color-light: #fff;
+      --ion-color-secondary: var(--f3-red);
+    }
+  }
+  .section > div {
+    width: 100%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .footer {
+    padding: 20px 30px;
+  }
+}
+
+.main-img:after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  box-shadow: inset 0px 0px 150px black;
+}
+
+.hide-sm {
+  display: initial;
+}
+.show-sm {
+  display: none;
+}
+
+.space-above {
+  margin-top: 16px;
+}
+.space-below {
+  margin-bottom: 16px;
+}
+.space-after {
+  margin-right: 16px;
+}
+.space-before {
+  margin-left: 16px;
+}
+.space-between {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.two-column-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  .flex-column {
+    &:first-of-type {
+      margin-right: 16px;
+    }
+    &:last-of-type {
+      margin-left: 16px;
+    }
+  }
+}
+
+a {
+  color: var(--f3-red);
+  font-weight: bold;
+  text-decoration: none;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+}
+
+/* Searchbars app-wide share the exicon look */
+ion-searchbar {
+  text-align: left;
+}
+
+/*
+ * Shared card grid layout: a responsive row of ion-cards, each wrapped in
+ * a .card-container. Add .wide on pages with 3+ cards that can use more
+ * room. Used by the PAX, AO, VS, and Summary pages.
+ */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 1500px;
+  margin: auto;
+
+  &.wide {
+    max-width: 1800px;
+  }
+
+  .card-container {
+    flex: 1;
+
+    // by default, hide the show more button, unless...
+    .show-more {
+      display: none;
+      --ion-color-primary: var(--f3-red);
+    }
+    // ... the list has more items than the limit
+    .show-more.has-more {
+      display: block;
+    }
+  }
+}
+
+/* Card header with title/subtitle on the left and an action on the right */
+.card-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+
+  .toggle-button {
+    margin: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+    min-width: auto;
+    height: auto;
+    color: var(--ion-color-medium);
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--ion-color-primary);
+    }
+
+    ion-icon {
+      font-size: 1.1em;
+      margin-right: 4px;
+    }
+
+    span {
+      font-size: 0.9em;
+    }
+  }
+}
+
+/* Small info icon next to tappable stat labels */
+.info-icon {
+  margin-left: 4px;
+  color: var(--ion-color-primary);
+  vertical-align: text-top;
+}
+
+/* Hero-number stat tiles (stats dashboard, family tree, ...) */
+.stat-tile-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 1500px;
+  margin: 16px auto 0;
+  padding: 0 12px;
+
+  .stat-tile {
+    background: var(--ion-card-background, var(--ion-background-color));
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px;
+
+    &.stat-tile-link {
+      cursor: pointer;
+
+      .stat-sub ion-icon {
+        vertical-align: -2px;
+      }
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      line-height: 1.2;
+      color: var(--ion-text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat-label {
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .stat-sub {
+      color: var(--ion-color-medium);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@media (max-width: 1700px) {
+  .card-grid.wide .card-container {
+    min-width: 50%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .card-grid .card-container {
+    min-width: 50%;
+  }
+}
+
+@media (max-width: 850px) {
+  // include the .wide variant so this rule out-specifies the 50% min-width
+  // rules above — otherwise wide grids never stack on phones
+  .card-grid .card-container,
+  .card-grid.wide .card-container {
+    min-width: 100%;
+
+    // on smaller screens, lists hide all but the top 3 items, so surface
+    // the show more button whenever there's a 4th
+    .show-more.has-4 {
+      display: block;
+    }
+  }
+
+  .stat-tile-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+ion-item app-pax-avatar[slot="start"] {
+  margin-inline-end: 16px;
+}
+
+ion-icon[name="logo-instagram"] {
+  color: #d74c92;
+}
+
+@media (max-width: 1150px) {
+  .top-container {
+    .main-img {
+      h1 {
+        font-size: 8vw;
+      }
+      h2 {
+        font-size: 3vw;
+      }
+    }
+  }
+  .hide-sm {
+    display: none;
+  }
+  .show-sm {
+    display: initial;
+  }
+}
+
+@media (max-width: 800px) {
+  .top-container {
+    .main-img {
+      h1 {
+        font-size: 12vw;
+      }
+      h2 {
+        font-size: 6vw;
+      }
+    }
+  }
+
+  .content .section {
+    padding: 40px 16px;
+
+    .two-column-container {
+      flex-direction: column;
+
+      .flex-column {
+        margin: 0;
+      }
+    }
+  }
+
+  .footer .space-between {
+    flex-direction: column;
+    line-height: 2em;
+  }
+
+  // TODO: maybe put this somewhere else
+  app-backblast-card {
+    width: 100%;
+  }
+}
+
+// Besties Grid Modal Styles
+.besties-modal {
+  --width: 95vw;
+  --max-width: 1000px;
+  --height: 85vh;
+  --max-height: 800px;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+// Google Form Modal Styles
+.google-form-modal {
+  --width: 95vw;
+  --max-width: 900px;
+  --height: 90vh;
+  --max-height: 900px;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+// Day detail sheet (tap a day on the attendance grid)
+.day-detail-modal {
+  --border-radius: 18px 18px 0 0;
+  --box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.18);
+
+  @media (min-width: 768px) {
+    --max-width: 560px;
+  }
+}
+
+// Who HC'd (tap the faces under a beatdown)
+.hc-popover {
+  --width: auto;
+  --max-width: 280px;
+  --border-radius: 14px;
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+// Stat rows: a short label on the left, a value on the right that may run
+// long ("158 BDs together: Telecaster & Chlorine"). The label sits in the
+// item's shadow input wrapper, which only ever gets the space the end slot
+// leaves over, so a content-sized value squeezed it to one word per line.
+// Cap the value instead and let it wrap; the label always keeps 150px.
+.stats-list ion-item > [slot="end"] {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 150px);
+  margin-inline-start: 12px;
+  text-align: right;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+// Who HC'd, as a sheet for the big events
+.hc-sheet {
+  --height: 70%;
+  --border-radius: 18px 18px 0 0;
+
+  @media (min-width: 768px) {
+    --max-width: 480px;
+  }
+}

@@ -1,0 +1,17 @@
+<ion-item
+  *ngIf="index < limit || showMore"
+  [class.hide-sm]="index >= smallLimit && !showMore"
+>
+  <app-pax-avatar slot="start" [name]="pax.name"></app-pax-avatar>
+  <ion-label class="ion-text-wrap">
+    <h2>
+      <a>{{ normalizedName }}</a>
+    </h2>
+    <p>
+      {{ subtext }}
+    </p>
+  </ion-label>
+  <strong slot="end">
+    {{ metric }}
+  </strong>
+</ion-item>

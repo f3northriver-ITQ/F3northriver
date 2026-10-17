@@ -1,0 +1,103 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>Backblasts</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Filter Rules Section -->
+  <div class="filter-section">
+    <div *ngFor="let rule of filterState.rules; let i = index" class="filter-rule">
+      <!-- Field Dropdown -->
+      <ion-select
+        [ngModel]="rule.field"
+        (ngModelChange)="onFieldChange(rule, $event)"
+        interface="popover">
+        <ion-select-option *ngFor="let field of fields" [value]="field.value">
+          {{ field.label }}
+        </ion-select-option>
+      </ion-select>
+
+      <!-- Operator Dropdown -->
+      <ion-select
+        [ngModel]="rule.operator"
+        (ngModelChange)="onOperatorChange(rule, $event)"
+        interface="popover">
+        <ion-select-option *ngFor="let operator of fieldConfig(rule).operators" [value]="operator">
+          {{ operator }}
+        </ion-select-option>
+      </ion-select>
+
+      <!-- Value Input with typeahead -->
+      <div class="value-wrap" *ngIf="rule.field !== 'date'; else dateInput">
+        <ion-input
+          [value]="rule.value"
+          [placeholder]="fieldConfig(rule).placeholder"
+          (ionInput)="onValueInput(rule, $event)"
+          (ionBlur)="hideSuggestions(rule)"
+        ></ion-input>
+
+        <div class="suggestions" *ngIf="rule.suggestions.length > 0">
+          <button
+            type="button"
+            class="suggestion"
+            *ngFor="let name of rule.suggestions"
+            (mousedown)="selectSuggestion(rule, name)">
+            <app-pax-avatar *ngIf="rule.field !== 'ao'" [name]="name" [size]="28"></app-pax-avatar>
+            <span>{{ utilService.normalizeName(name) }}</span>
+          </button>
+        </div>
+      </div>
+      <ng-template #dateInput>
+        <ion-input
+          class="date-input"
+          type="date"
+          [ngModel]="rule.value"
+          (ngModelChange)="onDateChange(rule, $event)"
+        ></ion-input>
+      </ng-template>
+
+      <!-- Remove Filter Button -->
+      <ion-button fill="clear" color="medium" (click)="removeFilterRule(i)">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="filter-actions">
+      <ion-button fill="outline" size="small" (click)="addFilterRule()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add Filter
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Backblast Grid -->
+  <app-backblast-grid
+    [title]="'Backblasts'"
+    [count]="filteredBackblasts?.length"
+    [backblasts]="backblasts"
+  ></app-backblast-grid>
+
+  <div class="center-container">
+    <h2 *ngIf="filteredBackblasts?.length && loading && !backblasts?.length">
+      Loading...
+    </h2>
+    <h2 *ngIf="filteredBackblasts?.length === 0">
+      No backblasts to show for the selected filters
+    </h2>
+  </div>
+
+  <ion-infinite-scroll
+    threshold="100px"
+    (ionInfinite)="loadMore($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more..."
+    ></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

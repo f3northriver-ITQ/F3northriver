@@ -1,0 +1,32 @@
+<ng-template #rows>
+  <ion-list lines="none">
+    <ion-item button detail="false" *ngFor="let name of names" (click)="goToPax(name)">
+      <app-pax-avatar slot="start" [name]="name" [size]="32"></app-pax-avatar>
+      <ion-label>{{ utilService.normalizeName(name) }}</ion-label>
+      <span slot="end" class="q-badge" *ngIf="isQ(name)">Q</span>
+    </ion-item>
+  </ion-list>
+</ng-template>
+
+<ng-container *ngIf="sheet; else popover">
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-title>{{ title }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="close()" aria-label="Close">
+          <ion-icon slot="icon-only" name="close"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="sheet-content">
+    <ng-container *ngTemplateOutlet="rows"></ng-container>
+  </ion-content>
+</ng-container>
+
+<ng-template #popover>
+  <div class="hc-popover">
+    <div class="title">{{ title }}</div>
+    <ng-container *ngTemplateOutlet="rows"></ng-container>
+  </div>
+</ng-template>

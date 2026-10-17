@@ -1,0 +1,175 @@
+.chart-container {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 20px 0;
+
+  .year-options {
+    display: flex;
+    justify-content: center;
+  }
+
+  .year-container {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1300px;
+    padding: 0 16px;
+    margin: auto;
+
+    ion-button {
+      border-bottom: 2px solid transparent;
+
+      &.active {
+        border-bottom: 2px solid var(--ion-color-primary);
+      }
+    }
+
+    .right-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  .grid-container {
+    overflow: auto;
+    padding: 10px 0;
+    max-width: 100%;
+
+    .row {
+      display: inline-flex;
+      padding: 0 20px;
+
+      .cell-container {
+        position: relative;
+        margin: 1px 2px;
+
+        .cell {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-width: 20px;
+          min-height: 20px;
+          font-size: 16px;
+          font-weight: bold;
+          border: 1px solid #333;
+          color: #fff;
+          text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
+          position: relative;
+
+          span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+
+          &:not(.hidden):hover {
+            cursor: pointer;
+            opacity: .8;
+          }
+
+          &.hidden {
+            opacity: 0;
+          }
+        }
+
+        &:hover .popover {
+          display: initial;
+          white-space: nowrap;
+        }
+
+        .popover {
+          position: absolute;
+          display: none;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 4px 8px;
+          background: #555;
+          color: #fff;
+          z-index: 1;
+
+          &.top {
+            bottom: -40px;
+          }
+          &.first {
+            transform: translateX(-25%);
+          }
+          &.last {
+            transform: translateX(-75%);
+          }
+        }
+      }
+    }
+  }
+  .legend-container {
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    flex-wrap: wrap;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 4px 8px;
+
+      .color-box {
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+      }
+    }
+
+    &.hide-legend .legend-item {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .chart-container {
+    .grid-container {
+      .row {
+        .cell-container {
+          .cell {
+            border: 1px solid #ddd;
+          }
+          .popover {
+            background: #999;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1560px) {
+  .grid-container {
+    position: absolute;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .legend-container {
+    margin-top: 220px;
+  }
+}
+
+@media (min-width: 700px) {
+  .chart-container {
+    align-items: center;
+
+    // show the year container for bigger displays
+    .year-container {
+      display: flex;
+      margin: 0;
+    }
+    // and hide the mobile year options
+    .year-options {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+.hc-popover {
+  padding: 10px 0 4px;
+  min-width: 220px;
+
+  .title {
+    padding: 0 16px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-list {
+  padding: 0;
+  background: transparent;
+}
+
+ion-item {
+  --min-height: 44px;
+  --background: transparent;
+  font-weight: 600;
+
+  app-pax-avatar {
+    margin: 6px 12px 6px 0;
+  }
+}
+
+.q-badge {
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--f3-red, #ee6059);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+// sheet mode
+ion-toolbar {
+  --background: transparent;
+}
+
+.sheet-content {
+  --padding-bottom: 24px;
+}

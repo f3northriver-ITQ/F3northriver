@@ -1,0 +1,105 @@
+<ion-content>
+  <div class="top-container">
+    <div class="main-img">
+      <h1>Workouts</h1>
+      <h2>Free beatdowns 6x/week</h2>
+    </div>
+  </div>
+  <div class="content">
+    <app-header></app-header>
+
+    <div class="section">
+      <h6 class="font-3 black-ops">AREAS OF OPERATION</h6>
+      <ion-text color="medium" class="font-1">
+        <p>F3 workouts are held in any weather conditions, free of charge and open to men of all ages.</p>
+        <p>Find a workout location [AO] below.</p>
+      </ion-text>
+
+      <iframe src="https://map.f3nation.com/?lat=43.6951&amp;lon=-116.4315&amp;zoom=10" frameborder="0"></iframe>
+      <ion-button color="secondary" fill="clear" href="https://map.f3nation.com/?lat=43.6951&amp;lon=-116.4315&amp;zoom=10" target="_blank">
+        View this map full screen
+        <ion-icon class="space-before" name="expand"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="section">
+      <ng-container *ngFor="let grouping of groupings; let i = index">
+        <h6 class="font-3 black-ops">
+          {{ grouping.title }}
+        </h6>
+
+        <!-- on the first grouping, show a message for FNGs and the link -->
+        <ng-container *ngIf="i === 0">
+          <h6 class="font-1">
+            <ion-text color="medium">
+              Just show up and introduce yourself as an <a routerLink="/fng">FNG</a>, you will be welcomed!
+            </ion-text>
+          </h6>
+          <ion-button
+            color="secondary"
+            fill="outline"
+            size="large"
+            class="space-above black-ops"
+            href="https://f3near.me"
+            target="_blank"
+          >
+            Find nearest to me
+          </ion-button>
+        </ng-container>
+
+        <div class="aos-container">
+          <h6 class="font-2 flex-column ao" *ngFor="let ao of grouping.aos">
+            <div class="title black-ops">
+              {{ ao.name }}
+            </div>
+            <ion-text color="medium" class="font-1">
+              <p *ngIf="ao.is_tomorrow && !ao.closed">
+                Led by <span class="highlight">{{ utilService.normalizeName(ao.tomorrows_q) }}</span> tomorrow
+              </p>
+              <p class="highlight" *ngIf="ao.closed">
+                Closed tomorrow
+              </p>
+              <p>
+                <ion-chip color="light">
+                  {{ ao.avg_pax_count }}
+                  <ion-icon name="people"></ion-icon>
+                </ion-chip>
+                <ion-chip color="light">
+                  {{ ao.workout_type }}
+                  <ion-icon [name]="ao.icon"></ion-icon>
+                </ion-chip>
+              </p>
+              <p>
+                <a
+                  [class.readonly]="!ao.map_location_url"
+                  [href]="ao.map_location_url"
+                  target="_blank"
+                >
+                  {{ ao.address || 'Location changes every week' }}
+                </a>
+              </p>
+              <p [class.highlight]="day.includes(tomorrow)" *ngFor="let day of ao.schedule">
+                {{ day }}
+              </p>
+            </ion-text>
+          </h6>
+        </div>
+      </ng-container>
+    </div>
+    <div class="footer section">
+      <div class="space-between">
+        <p>
+          © Copyright {{ currentYear }}   |   F3 North River    |   All Rights Reserved   |   Powered by the PAX
+        </p>
+        <div>
+          <ion-button color="light" fill="clear" href="https://www.instagram.com/f3boise/" target="_blank">
+            <ion-icon slot="icon-only" name="logo-instagram"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" href="https://twitter.com/f3boise" target="_blank">
+            <ion-icon slot="icon-only" name="logo-twitter"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

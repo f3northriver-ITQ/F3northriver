@@ -1,0 +1,29 @@
+.kotter-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 20px;
+  max-width: 1800px;
+  margin: auto;
+
+  .explanation {
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  ion-card {
+    width: 350px;
+
+    .pax-name {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+@media (max-width: 800px) {
+  .kotter-container ion-card {
+    width: 100%;
+  }
+}

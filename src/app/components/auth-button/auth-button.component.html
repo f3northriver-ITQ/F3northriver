@@ -1,0 +1,24 @@
+<ng-container *ngIf="!known; else loggedIn">
+  <ion-button
+    class="login-button"
+    color="primary"
+    (click)="openLoginModal()">
+    Sign in
+  </ion-button>
+</ng-container>
+
+<ng-template #loggedIn>
+  <div class="user-info">
+    <div class="user-profile" (click)="goToPaxPage($event)">
+      <ion-avatar class="user-avatar">
+        <img [src]="photoURL || '/assets/f3.jpg'" [alt]="displayName" />
+      </ion-avatar>
+      <span class="user-name">{{ displayName }}</span>
+    </div>
+    <ion-icon
+      name="ellipsis-horizontal"
+      class="menu-icon"
+      (click)="showUserMenu($event)">
+    </ion-icon>
+  </div>
+</ng-template>

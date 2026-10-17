@@ -1,0 +1,82 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>Exicon</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      mode="ios"
+      (ionInput)="onSearch($event)"
+      placeholder="Search"
+    ></ion-searchbar>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="selectedCategories.length > 0">
+    <div class="filters">
+      <ion-chip *ngFor="let category of selectedCategories">
+        <ion-label>{{ category }}</ion-label>
+        <ion-icon name="close" (click)="removeCategory(category)"></ion-icon>
+      </ion-chip>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Table -->
+  <ion-grid class="desktop">
+    <ion-row class="header-row">
+      <ion-col size="3"><strong>Title</strong></ion-col>
+      <ion-col size="6"><strong>Description</strong></ion-col>
+      <ion-col size="3"><strong>Categories</strong></ion-col>
+    </ion-row>
+    <ion-row *ngFor="let exercise of displayedExercises">
+      <ion-col size="3">
+        {{ exercise.title }}
+      </ion-col>
+      <ion-col size="6">
+        {{ exercise.description }}
+      </ion-col>
+      <ion-col size="3">
+        <ion-chip
+          color="primary"
+          *ngFor="let cat of exercise.categories"
+          (click)="addCategory(cat.label)"
+        >
+          {{ cat.label }}
+        </ion-chip>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-list class="mobile">
+    <ion-item *ngFor="let exercise of displayedExercises">
+      <ion-label class="ion-text-wrap">
+        <h2>{{ exercise.title }}</h2>
+        <p>{{ exercise.description }}</p>
+        <div>
+          <ion-chip
+            *ngFor="let cat of exercise.categories"
+            (click)="addCategory(cat.label)"
+            color="primary"
+          >
+            {{ cat.label }}
+          </ion-chip>
+        </div>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Infinite Scroll -->
+  <ion-infinite-scroll
+    threshold="100px"
+    (ionInfinite)="loadMore($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more..."
+    ></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

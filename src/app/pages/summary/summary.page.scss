@@ -1,0 +1,170 @@
+.month-card {
+  width: 100%;
+
+  .pax-avatars {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+
+    a {
+      margin: 4px 4px 0 0;
+      position: relative;
+
+      &:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 4px 8px;
+        background: var(--ion-color-dark);
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+        margin-bottom: 4px;
+      }
+    }
+  }
+}
+
+.milestone-group {
+  display: flex;
+  align-items: center;
+
+  .milestone-label {
+    display: inline-block;
+    background: rgba(var(--ion-color-primary-rgb), 0.18);
+    color: var(--ion-color-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 4px;
+    font-weight: bold;
+  }
+
+  .pax-avatars {
+    margin-right: 8px;
+  }
+}
+
+.vq-groups {
+  margin: 8px 0;
+}
+
+.vq-entry {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+
+  .vq-details {
+    margin-left: 8px;
+    font-size: 0.9em;
+  }
+}
+
+.first-vq-badge {
+  display: inline-block;
+  background: var(--ion-color-success);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-left: 8px;
+}
+
+.date-range-controls {
+  padding: 16px;
+  background: var(--ion-color-light);
+  margin-bottom: 16px;
+
+  .date-inputs {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+
+    ion-item {
+      flex: 1;
+    }
+  }
+}
+
+.date-range-stats {
+  padding: 16px;
+
+  ion-card {
+    margin: 0;
+
+    ion-card-content {
+      h3 {
+        margin-top: 16px;
+        margin-bottom: 8px;
+        color: var(--ion-color-primary);
+      }
+
+      p {
+        margin: 4px 0;
+      }
+    }
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.loading-fixed {
+  position: absolute !important;
+}
+
+.pretty-card {
+  background: var(--ion-card-background, #fff);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 32px 24px 24px 24px;
+  margin: 24px auto 32px auto;
+  max-width: 700px;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.date-label {
+  font-weight: 600;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+  color: var(--ion-text-color);
+  letter-spacing: 0.02em;
+}
+
+.pretty-date-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(var(--ion-color-primary-rgb), 0.35);
+  border-radius: 8px;
+  font-size: 1.1em;
+  background: var(--ion-color-light);
+  color: var(--ion-text-color);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.pretty-date-input:focus {
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.25);
+  background: var(--ion-card-background, #fff);
+}
+
+.show-more {
+  padding: 8px 16px 32px;
+}

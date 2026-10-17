@@ -1,0 +1,392 @@
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh; /* Fallback for browsers that don't support dvh */
+  height: 100dvh; /* Use dynamic viewport height for mobile Safari */
+  width: 280px;
+  background: #1e2123;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+
+  &.open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  // Always visible on desktop
+  &.desktop-open {
+    transform: translateX(0);
+    opacity: 1;
+    box-shadow: none;
+    pointer-events: auto;
+  }
+
+  .sidebar-header {
+    flex-shrink: 0;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .close-button {
+      --color: #fff;
+      margin: 0;
+    }
+
+    // Hide header on desktop
+    @media (min-width: 1024px) {
+      display: none;
+    }
+  }
+
+  .sidebar-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0; // Important for flex scrolling
+  }
+
+  .sidebar-content {
+    padding: 16px 0;
+  }
+
+  .sidebar-footer {
+    flex-shrink: 0;
+    padding: 16px;
+    background: #1e2123;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+
+    // Styling for auth button in sidebar footer
+    ::ng-deep .login-button {
+      width: 100%;
+      --background: #ee6059;
+      --color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    ::ng-deep .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 12px;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.05);
+      transition: background-color 0.2s;
+      width: 100%;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+      }
+
+      .user-name {
+        font-size: 14px;
+        color: #fff;
+        font-weight: 500;
+        flex: 1;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .pax-search-section {
+    margin-bottom: 8px;
+
+    .find-pax-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      ion-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .pax-search-panel {
+    padding: 8px 16px 0;
+  }
+
+  .pax-search-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &:focus {
+      border-color: #ee6059;
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .pax-search-loading {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+
+    ion-spinner {
+      --color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .pax-search-results {
+    margin-top: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .pax-search-empty {
+    padding: 8px 24px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+  }
+
+  .region-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-right: 8px;
+  }
+
+  // section labels ("My AOs", "Explore", "About F3")
+  .group-title {
+    display: block;
+    flex: 1;
+    text-align: left;
+    padding: 14px 24px 6px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+
+    &.as-button {
+      cursor: pointer;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+
+  .nav-link.with-icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    ion-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    &.secondary {
+      font-weight: 500;
+      font-size: 15px;
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+  }
+
+  .ao-link.nested {
+    padding-left: 56px;
+  }
+
+  .ao-link.muted {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+  }
+
+  // .ao-link is display: block further down at the same specificity, so
+  // double up here to keep the name and the kind on opposite ends
+  .ao-link.search-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    .result-kind {
+      flex-shrink: 0;
+      margin-left: auto;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  .region-link,
+  .nav-link {
+    display: block;
+    flex: 1;
+    text-align: left;
+    padding: 12px 24px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      background-color: rgba(238, 96, 89, 0.2);
+      color: #ee6059;
+      border-left: 3px solid #ee6059;
+    }
+
+    &.other-ao-section {
+      cursor: default;
+      opacity: 0.8;
+
+      &:hover {
+        background-color: transparent;
+      }
+
+      &[disabled] {
+        cursor: default;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .collapse-toggle {
+    --color: rgba(255, 255, 255, 0.6);
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin: 0;
+    min-width: auto;
+    height: auto;
+
+    &:hover {
+      --color: #fff;
+    }
+  }
+
+  .ao-list {
+    padding-left: 16px;
+    margin-top: 8px;
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+    opacity: 1;
+
+    &.collapsed {
+      max-height: 0;
+      margin-top: 0;
+      opacity: 0;
+    }
+  }
+
+  .ao-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 24px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 14px;
+    background: none;
+    border: none;
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    &.active {
+      background-color: rgba(238, 96, 89, 0.15);
+      color: #ee6059;
+      border-left: 2px solid #ee6059;
+    }
+  }
+}
+
+// Hide sidebar for static pages (on all screen sizes)
+.sidebar.hidden {
+  display: none !important;
+}
+
+// Desktop styles - sidebar should be part of flex layout, not overlapping
+@media (min-width: 1024px) {
+  .sidebar {
+    position: relative !important;
+    transform: translateX(0) !important;
+    flex-shrink: 0;
+    z-index: 1;
+    box-shadow: none;
+    height: 100vh; /* Fallback for browsers that don't support dvh */
+    height: 100dvh; /* Use dynamic viewport height for mobile Safari */
+    top: auto;
+    left: auto;
+  }
+}

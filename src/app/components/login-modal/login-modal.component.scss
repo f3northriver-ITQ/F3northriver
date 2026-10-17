@@ -1,0 +1,97 @@
+.login-content {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px 0;
+
+  h2 {
+    margin-top: 0;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
+  }
+
+  ion-item {
+    margin-bottom: 20px;
+    --padding-start: 0;
+    --padding-end: 0;
+  }
+
+  ion-button {
+    margin-top: 20px;
+  }
+
+  .picker-search {
+    padding: 0;
+    --box-shadow: none;
+    --background: rgba(var(--ion-color-medium-rgb), 0.12);
+  }
+
+  .picker-loading {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .picker-results {
+    padding: 0;
+    margin-top: 8px;
+
+    ion-item {
+      --padding-start: 8px;
+      font-weight: 600;
+
+      app-pax-avatar {
+        margin: 6px 12px 6px 0;
+      }
+    }
+  }
+
+  .picker-empty {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .slack-email-note {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+  }
+
+  .help-text {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--ion-color-medium);
+  }
+
+  .spam-folder-note {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 12px 16px;
+    background-color: rgba(var(--ion-color-warning-rgb), 0.1);
+    border-left: 4px solid var(--ion-color-warning);
+    border-radius: 4px;
+
+    ion-icon {
+      font-size: 24px;
+      color: var(--ion-color-warning);
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--ion-color-dark);
+
+      strong {
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+}

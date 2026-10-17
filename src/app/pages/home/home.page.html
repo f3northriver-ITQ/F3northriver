@@ -1,0 +1,112 @@
+<ion-content>
+  <div class="top-container">
+    <div class="main-img">
+      <h1>Accelerate with us</h1>
+      <h2>Fitness + Fellowship + Faith</h2>
+    </div>
+  </div>
+  <div class="content">
+    <app-header></app-header>
+    <div class="section">
+      <h6 class="font-2 black-ops">THIS IS</h6>
+      <h1 class="font-5 black-ops">F3 NORTH RIVER</h1>
+      <h6 class="font-1 black-ops">FREE workout groups for MEN</h6>
+      <img class="space-above space-below" src="../../../assets/shadow.png">
+      <img class="space-above space-below" height="200" src="../../../assets/f3-boise.png">
+    </div>
+    <div class="section">
+      <div class="two-column-container">
+        <div class="flex-column">
+          <h6 class="font-2 black-ops">WE ARE</h6>
+          <p class="font-1">
+            {{ paxCount }}+ guys that meet up in small groups to workout in parks and public spaces around the treasure valley.
+          </p>
+          <p class="font-1">
+            <b>We hold {{ aoCount }}+ workouts in Boise each week. Weekday workouts are generally 45 MIN & 60 MIN on Saturday.</b>
+          </p>
+        </div>
+        <div class="flex-column">
+          <h6 class="font-2 black-ops">A PART OF</h6>
+          <p class="font-1">
+            F3 Nation, a network of 3,275 free, peer-led workouts for men in 252 regions with a mission to:
+          </p>
+          <p class="font-1">
+            <b>plant, grow and serve small workout groups for men invigorating male community leadership.</b>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="core-principles">
+      <div class="priciples-container section">
+        <img src="../../../assets/f3-white.png">
+        <h1 class="font-3 black-ops">CORE PRINCIPLES</h1>
+        <div class="space-between">
+          <div class="principle flex-column">
+            <ion-icon name="cash-outline"></ion-icon>
+            <h2>Free of Charge</h2>
+            <ion-text color="medium">Never pay to workout, ever.</ion-text>
+          </div>
+          <div class="principle flex-column">
+            <ion-icon name="people-outline"></ion-icon>
+            <h2>Open to all Men</h2>
+            <ion-text color="medium">No matter the man, you are welcome here.</ion-text>
+          </div>
+          <div class="principle flex-column">
+            <ion-icon name="rainy-outline"></ion-icon>
+            <h2>Held Outdoors</h2>
+            <ion-text color="medium">Rain or Shine, Hot or Cold, we are out there.</ion-text>
+          </div>
+          <div class="principle flex-column">
+            <ion-icon name="sync-outline"></ion-icon>
+            <h2>Peer Led</h2>
+            <ion-text color="medium">Rotating fashion of men leading each other.</ion-text>
+          </div>
+          <div class="principle flex-column">
+            <ion-icon name="help-buoy-outline"></ion-icon>
+            <h2>Ends with a COT</h2>
+            <ion-text color="medium">Always ends with a Circle of Trust.</ion-text>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <img width="200" src="../../../assets/f3-shovel-flag.png">
+      <h1 class="font-4 black-ops">FIND A WORKOUT</h1>
+      <h1 class="font-2 black-ops">all you gotta do is <b>SHOW UP</b></h1>
+      <ion-button color="secondary" fill="outline" size="large" class="space-above black-ops" (click)="navTo('/workouts')">
+        Find a workout
+      </ion-button>
+    </div>
+    <div class="section">
+      <h6 class="font-4 black-ops">[F.N.G.]</h6>
+      <ion-text color="medium" class="font-1">
+        Hey Friendly New Guy… What did you <i>think</i> FNG stood for?
+      </ion-text>
+
+      <h6 class="font-2 space-above space-below">ARE YOU LOOKING TO ACCELERATE YOUR LIFE?</h6>
+
+      <div class="space-above space-below font-1">
+        We welcome men of all fitness levels to our workouts and have no requirement for membership other that you show up at the appointed time + place and follow the workout leader [the “Q” in F³ lexicon]. If you still have questions just ask any of the guys and they'll help or point you in the right direction!
+      </div>
+
+      <ion-button color="secondary" fill="outline" size="large" class="space-above black-ops" (click)="navTo('/fng')">
+        What to expect
+      </ion-button>
+    </div>
+    <div class="footer section">
+      <div class="space-between">
+        <p>
+          © Copyright {{ currentYear }}   |   F3 North River    |   All Rights Reserved   |   Powered by the PAX
+        </p>
+        <div>
+          <ion-button color="light" fill="clear" href="https://www.instagram.com/f3boise/" target="_blank">
+            <ion-icon slot="icon-only" name="logo-instagram"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" href="https://twitter.com/f3boise" target="_blank">
+            <ion-icon slot="icon-only" name="logo-twitter"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

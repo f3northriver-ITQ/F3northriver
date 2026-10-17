@@ -1,0 +1,522 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>AO Map</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <app-workouts-nav></app-workouts-nav>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollY]="false">
+
+  <div *ngIf="initialLoading" class="loading-overlay">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading workouts…</p>
+  </div>
+
+  <div *ngIf="error" class="error-overlay">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="map-layout" *ngIf="!initialLoading && !error">
+
+    <!-- Google Map -->
+    <div class="map-section">
+      <div class="map-refresh-pill" *ngIf="refreshing" role="status" aria-live="polite">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Updating workouts…</span>
+      </div>
+
+      <!-- Drag-to-place pin mode -->
+      <div class="pin-placement-banner" *ngIf="pinPlacementActive" role="dialog" aria-label="Position the pin">
+        <div class="pin-placement-text">
+          <strong>Position the pin</strong>
+          <span>Drag the pin or click the map — zoom in for the exact spot.</span>
+        </div>
+        <div class="pin-placement-actions">
+          <button type="button" class="pin-btn-confirm" (click)="confirmPinPlacement()">Use this spot</button>
+          <button type="button" class="pin-btn-cancel" (click)="cancelPinPlacement()">Cancel</button>
+        </div>
+      </div>
+      <google-map #mapRef
+                  width="100%" height="100%"
+                  [center]="mapCenter"
+                  [options]="mapOptions"
+                  (mapInitialized)="scheduleFitMapToPins()"
+                  (mapClick)="onMapClick($event)">
+        <!-- Only mount markers with coords: MapMarker defaults missing position
+             to Googleplex (37.42, -122.08) — shows as a stray Bay Area pin. -->
+        <ng-container *ngFor="let ao of aos">
+          <map-marker
+            *ngIf="ao.position"
+            [position]="ao.position"
+            [options]="ao.markerOptions!"
+            (mapClick)="onMarkerClick(ao)">
+          </map-marker>
+        </ng-container>
+        <!-- Draggable pin while repositioning a location -->
+        <map-marker
+          *ngIf="pinPlacementActive && pinPlacementLatLng"
+          [position]="pinPlacementLatLng"
+          [options]="pinPlacementMarkerOptions"
+          (mapDragend)="onPinPlacementDragend($event)">
+        </map-marker>
+      </google-map>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" [class.sidebar--mobile-expanded]="mobileSidebarExpanded">
+      <!-- Mobile drag-handle / toggle strip -->
+      <button
+        type="button"
+        class="mob-handle"
+        (click)="mobileSidebarExpanded = !mobileSidebarExpanded"
+        [attr.aria-expanded]="mobileSidebarExpanded"
+        aria-label="Toggle region list">
+        <span class="mob-handle-pill" aria-hidden="true"></span>
+        <span class="mob-handle-label">
+          <ng-container *ngIf="!selectedAo">
+            {{ activeRegionsBundle.length ? (aos.length + ' location' + (aos.length !== 1 ? 's' : '')) : 'Select regions' }}
+          </ng-container>
+          <ng-container *ngIf="selectedAo">{{ detailPanelAoTitle(selectedAo) }}</ng-container>
+        </span>
+        <ion-icon
+          [name]="mobileSidebarExpanded ? 'chevron-down-outline' : 'chevron-up-outline'"
+          class="mob-handle-chevron"
+          aria-hidden="true">
+        </ion-icon>
+      </button>
+      <div class="sidebar-header">
+        <ng-container *ngIf="!selectedAo">
+          <h2>Region Overview</h2>
+          <p *ngIf="activeRegionsBundle.length">
+            {{ aos.length }} active locations across {{ activeRegionsBundle.length }} region{{ activeRegionsBundle.length !== 1 ? 's' : '' }}
+          </p>
+          <p *ngIf="!activeRegionsBundle.length" class="sidebar-header-empty-hint">
+            No regions selected. Search Nationwide regions below or load all Boise regions.
+          </p>
+        </ng-container>
+        <ng-container *ngIf="selectedAo">
+          <div class="ao-panel-header">
+            <div class="ao-panel-header-text">
+              <button
+                *ngIf="detailEditAoTitle"
+                type="button"
+                class="ao-panel-title-btn"
+                (click)="openAoMetaModal()"
+                title="Edit AO name and about">
+                {{ detailPanelAoTitle(selectedAo) }}
+              </button>
+              <span
+                *ngIf="!detailEditAoTitle"
+                class="ao-panel-title-text">
+                {{ detailPanelAoTitle(selectedAo) }}
+              </span>
+              <div class="ao-panel-region-row">
+                <span class="region-badge">{{ selectedAo.region }}</span>
+              </div>
+            </div>
+            <button
+              *ngIf="detailShowOverflowMenu"
+              type="button"
+              class="ao-detail-menu-btn"
+              [disabled]="isDeletingAo || aoSaving"
+              title="More actions"
+              aria-label="More actions"
+              (click)="openAoDetailMenu($event)">
+              <ion-icon name="ellipsis-horizontal"></ion-icon>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="sidebar-content">
+
+        <app-map-region-tree
+          *ngIf="!selectedAo"
+          [regions]="regionTree"
+          [error]="treeActionError"
+          [(searchQuery)]="regionSearchQuery"
+          [searchResults]="regionSearchResultsFiltered"
+          [searchLoading]="regionSearchLoading"
+          [exploredNationRegions]="exploredNationRegions"
+          [showHomeMetrosButton]="showHomeMetrosButton"
+          [loading]="refreshing || initialLoading"
+          [editingAoId]="editingAoId"
+          [(editingAoName)]="aoEditNameTree"
+          [editingAoSaving]="aoEditNameSaving"
+          (searchInput)="onRegionSearchInput($event)"
+          (exploreRegion)="exploreNationRegion($event)"
+          (clearExplore)="resetHomeMetrosExplore()"
+          (clearAllRegions)="clearAllRegionsExplore()"
+          (removeExploredRegion)="removeExploredNationRegion($event)"
+          (aoSelected)="selectTreeAo($event.ao, $event.loc)"
+          (locationFocused)="panToLocation($event)"
+          (editLocation)="openLocationEditModalFromTree($event.loc, $event.event)"
+          (deleteLocation)="confirmDeleteLocation($event.loc, $event.event)"
+          (startEditAo)="startEditAoName($event.ao, $event.loc, $event.event)"
+          (saveAo)="saveAoName($event.ao, $event.loc, $event.event)"
+          (cancelEditAo)="cancelEditAoName()"
+          (deleteAo)="confirmDeleteTreeAo($event.ao, $event.loc, $event.event)">
+        </app-map-region-tree>
+
+        <app-map-ao-detail
+          *ngIf="selectedAo"
+          [ao]="selectedAo"
+          [closures]="selectedAoClosures"
+          [locationLabel]="detailPanelLocationLabel(selectedAo)"
+          [about]="detailPanelAoAbout(selectedAo)"
+          [canEditLocation]="detailEditLocation"
+          [canEditSchedule]="detailEditSchedule"
+          (back)="clearSelection()"
+          (editLocation)="openLocationEditModal()"
+          (editDay)="openDayEdit($event)">
+        </app-map-ao-detail>
+
+      </div>
+    </div>
+
+  </div>
+
+
+</ion-content>
+
+<!-- New AO modal -->
+<ion-modal [isOpen]="newAoModalOpen" (didDismiss)="closeNewAoModal()" [backdropDismiss]="!creatingAo">
+  <ng-template>
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h3>New AO</h3>
+        <p class="modal-subtitle">Creates an org + location in F3 Nation</p>
+      </div>
+
+      <div class="form-group place-search" *ngIf="placeSearchAvailable">
+        <label>Find a place</label>
+        <div class="place-search-box">
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input
+            type="text"
+            [(ngModel)]="placeSearchQuery"
+            (ngModelChange)="onPlaceSearchInput($event)"
+            (focus)="onPlaceSearchFocus()"
+            (blur)="onPlaceSearchBlur()"
+            (keydown)="onPlaceSearchKeydown($event)"
+            placeholder="Search a park, school, or address…"
+            autocomplete="off"
+            role="combobox"
+            [attr.aria-expanded]="placeDropdownOpen">
+          <ion-spinner *ngIf="placeSearchLoading" name="crescent"></ion-spinner>
+        </div>
+        <div class="place-suggestions" *ngIf="placeDropdownOpen && placeSuggestions.length" role="listbox">
+          <button
+            type="button"
+            *ngFor="let s of placeSuggestions; let i = index"
+            role="option"
+            [class.highlighted]="i === placeHighlightIndex"
+            [attr.aria-selected]="i === placeHighlightIndex"
+            (mousedown)="$event.preventDefault(); selectPlaceSuggestion(s)"
+            (mousemove)="placeHighlightIndex = i">
+            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+            <span class="place-suggestion-text">
+              <span class="place-main">{{ s.mainText }}</span>
+              <span class="place-secondary" *ngIf="s.secondaryText">{{ s.secondaryText }}</span>
+            </span>
+          </button>
+        </div>
+        <p class="modal-hint">Picking a result fills the address and map pin in one go.</p>
+      </div>
+
+      <div class="form-group">
+        <label>AO Name <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="newAoForm.name" placeholder="e.g. Bleach">
+      </div>
+
+      <div class="form-group">
+        <label>Region <span class="required-star">*</span></label>
+        <select [(ngModel)]="newAoForm.regionId">
+          <option *ngFor="let r of newAoRegionOptions" [ngValue]="r.id">{{ r.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" [(ngModel)]="newAoForm.addressStreet" placeholder="123 Main St">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" [(ngModel)]="newAoForm.addressCity" placeholder="Boise">
+        </div>
+        <div class="form-group">
+          <label>Zip</label>
+          <input type="text" [(ngModel)]="newAoForm.addressZip" placeholder="83701">
+        </div>
+      </div>
+
+      <!-- Map pin -->
+      <div class="pin-row">
+        <div class="pin-row-main">
+          <ion-icon name="pin" aria-hidden="true"></ion-icon>
+          <span class="pin-coords" *ngIf="locationEditCoords">
+            {{ locationEditCoords.lat | number:'1.5-5' }}, {{ locationEditCoords.lng | number:'1.5-5' }}
+          </span>
+          <span class="pin-coords pin-coords--empty" *ngIf="!locationEditCoords">no pin</span>
+          <button type="button" class="pin-adjust-btn" (click)="startPinPlacement()" [disabled]="creatingAo">
+            <ion-icon name="move-outline" aria-hidden="true"></ion-icon>
+            Adjust on map
+          </button>
+        </div>
+        <p class="pin-status">{{ pinStatusLabel }}</p>
+      </div>
+
+      <!-- Advanced: raw coordinates -->
+      <button type="button" class="advanced-toggle" (click)="toggleLocationEditAdvanced()">
+        <ion-icon [name]="locationEditAdvancedOpen ? 'chevron-down-outline' : 'chevron-forward-outline'" aria-hidden="true"></ion-icon>
+        Advanced
+      </button>
+      <div class="advanced-section" *ngIf="locationEditAdvancedOpen">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="text" inputmode="decimal" [(ngModel)]="locationEditLatInput" (ngModelChange)="onManualCoordInput()" placeholder="43.61500">
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="text" inputmode="decimal" [(ngModel)]="locationEditLngInput" (ngModelChange)="onManualCoordInput()" placeholder="-116.35000">
+          </div>
+        </div>
+        <button type="button" class="pin-reset-btn" (click)="resetPinToAddress()" [disabled]="locationEditPinResetting || creatingAo">
+          <ion-spinner *ngIf="locationEditPinResetting" name="crescent"></ion-spinner>
+          {{ locationEditPinResetting ? 'Locating…' : 'Reset pin from address' }}
+        </button>
+      </div>
+      <div class="save-error" *ngIf="locationEditCoordError">{{ locationEditCoordError }}</div>
+
+      <div class="save-error" *ngIf="createAoError">{{ createAoError }}</div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" (click)="createNewAo()" [disabled]="!newAoForm.name.trim() || !locationEditCoords || creatingAo || !!locationEditCoordError">
+          {{ creatingAo ? 'Creating…' : 'Create AO' }}
+        </button>
+        <button class="btn-cancel" (click)="closeNewAoModal()" [disabled]="creatingAo">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Day edit modal -->
+<ion-modal [isOpen]="modalOpen" (didDismiss)="closeModal()" [backdropDismiss]="true">
+  <ng-template>
+    <div class="modal-inner" *ngIf="editingDay">
+      <div class="modal-header">
+        <h3>{{ editingDay.event ? 'Edit' : 'Add' }} {{ editingDay.dayName }} Workout</h3>
+        <p class="modal-subtitle">
+          {{ editingDay.event
+            ? 'Update the workout details for ' + editingDay.dayName
+            : 'Add a new workout for ' + editingDay.dayName }}
+        </p>
+        <p class="modal-hint">
+          Workout name and description apply to this day only. The AO-wide name and description are edited from the AO title at the top of the side panel.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Workout name</label>
+        <input type="text" [(ngModel)]="dayForm.name" placeholder="e.g. Ruck and Discuss or Bleach">
+      </div>
+
+      <div class="form-group">
+        <label>Workout description</label>
+        <textarea [(ngModel)]="dayForm.description" rows="4" placeholder="Details for this day’s workout (separate from the AO description)"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start</label>
+          <input type="time" [(ngModel)]="dayForm.startTime">
+        </div>
+        <div class="form-group">
+          <label>End</label>
+          <input type="time" [(ngModel)]="dayForm.endTime">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <select [(ngModel)]="dayForm.eventTypeId">
+          <option *ngFor="let t of eventTypes" [ngValue]="t.id">{{ t.name }}</option>
+        </select>
+      </div>
+
+      <div class="save-error" *ngIf="saveError">{{ saveError }}</div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" (click)="saveDay()" [disabled]="saving || deleting">
+          {{ saving ? 'Saving…' : (editingDay.event ? 'Update' : 'Create') }}
+        </button>
+        <button
+          *ngIf="editingDay.event"
+          class="btn-delete"
+          (click)="deleteDay()"
+          [disabled]="saving || deleting">
+          {{ deleting ? 'Removing…' : 'Remove' }}
+        </button>
+        <button class="btn-cancel" (click)="closeModal()" [disabled]="saving || deleting">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Edit AO org (name + about) -->
+<ion-modal [isOpen]="aoMetaModalOpen" (didDismiss)="closeAoMetaModal()" [backdropDismiss]="!aoSaving">
+  <ng-template>
+    <div class="modal-inner" *ngIf="selectedAo">
+      <div class="modal-header">
+        <h3>Edit AO</h3>
+        <p class="modal-meta-id">AO org ID {{ selectedAo.orgId ?? selectedAo.parentAoId ?? '—' }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="aoEditName" placeholder="AO name">
+      </div>
+
+      <div class="form-group">
+        <label>About</label>
+        <textarea [(ngModel)]="aoEditDescription" rows="5" placeholder="Describe the AO…"></textarea>
+      </div>
+
+      <div class="save-error" *ngIf="aoSaveError">{{ aoSaveError }}</div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" (click)="saveAoMetaFromModal()" [disabled]="!aoEditName.trim() || aoSaving">
+          {{ aoSaving ? 'Saving…' : 'Save' }}
+        </button>
+        <button class="btn-cancel" (click)="closeAoMetaModal()" [disabled]="aoSaving">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Edit location (search + name + address + pin) -->
+<ion-modal [isOpen]="locationEditModalOpen" (didDismiss)="closeLocationEditModal()" [backdropDismiss]="!aoSaving">
+  <ng-template>
+    <div class="modal-inner" *ngIf="locationEditModalLocationId">
+      <div class="modal-header">
+        <h3>Edit location</h3>
+        <p class="modal-meta-id">Location ID {{ locationEditModalLocationId }}</p>
+      </div>
+
+      <div class="form-group place-search" *ngIf="placeSearchAvailable">
+        <label>Find a place</label>
+        <div class="place-search-box">
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input
+            type="text"
+            [(ngModel)]="placeSearchQuery"
+            (ngModelChange)="onPlaceSearchInput($event)"
+            (focus)="onPlaceSearchFocus()"
+            (blur)="onPlaceSearchBlur()"
+            (keydown)="onPlaceSearchKeydown($event)"
+            placeholder="Search a park, school, or address…"
+            autocomplete="off"
+            role="combobox"
+            [attr.aria-expanded]="placeDropdownOpen">
+          <ion-spinner *ngIf="placeSearchLoading" name="crescent"></ion-spinner>
+        </div>
+        <div class="place-suggestions" *ngIf="placeDropdownOpen && placeSuggestions.length" role="listbox">
+          <button
+            type="button"
+            *ngFor="let s of placeSuggestions; let i = index"
+            role="option"
+            [class.highlighted]="i === placeHighlightIndex"
+            [attr.aria-selected]="i === placeHighlightIndex"
+            (mousedown)="$event.preventDefault(); selectPlaceSuggestion(s)"
+            (mousemove)="placeHighlightIndex = i">
+            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+            <span class="place-suggestion-text">
+              <span class="place-main">{{ s.mainText }}</span>
+              <span class="place-secondary" *ngIf="s.secondaryText">{{ s.secondaryText }}</span>
+            </span>
+          </button>
+        </div>
+        <p class="modal-hint">Picking a result fills the name, address, and map pin in one go.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Location name</label>
+        <input type="text" [(ngModel)]="aoEditLocationName" placeholder="Display name">
+      </div>
+
+      <div class="form-group">
+        <label>Street</label>
+        <input type="text" [(ngModel)]="aoEditAddressStreet" placeholder="Street address">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" [(ngModel)]="aoEditAddressCity" placeholder="Boise">
+        </div>
+        <div class="form-group">
+          <label>ZIP</label>
+          <input type="text" [(ngModel)]="aoEditAddressZip" placeholder="83701">
+        </div>
+      </div>
+
+      <!-- Map pin -->
+      <div class="pin-row">
+        <div class="pin-row-main">
+          <ion-icon name="pin" aria-hidden="true"></ion-icon>
+          <span class="pin-coords" *ngIf="locationEditCoords">
+            {{ locationEditCoords.lat | number:'1.5-5' }}, {{ locationEditCoords.lng | number:'1.5-5' }}
+          </span>
+          <span class="pin-coords pin-coords--empty" *ngIf="!locationEditCoords">no pin</span>
+          <button type="button" class="pin-adjust-btn" (click)="startPinPlacement()" [disabled]="aoSaving">
+            <ion-icon name="move-outline" aria-hidden="true"></ion-icon>
+            Adjust on map
+          </button>
+        </div>
+        <p class="pin-status">{{ pinStatusLabel }}</p>
+      </div>
+
+      <!-- Advanced: raw coordinates -->
+      <button type="button" class="advanced-toggle" (click)="toggleLocationEditAdvanced()">
+        <ion-icon [name]="locationEditAdvancedOpen ? 'chevron-down-outline' : 'chevron-forward-outline'" aria-hidden="true"></ion-icon>
+        Advanced
+      </button>
+      <div class="advanced-section" *ngIf="locationEditAdvancedOpen">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="text" inputmode="decimal" [(ngModel)]="locationEditLatInput" (ngModelChange)="onManualCoordInput()" placeholder="43.61500">
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="text" inputmode="decimal" [(ngModel)]="locationEditLngInput" (ngModelChange)="onManualCoordInput()" placeholder="-116.35000">
+          </div>
+        </div>
+        <button type="button" class="pin-reset-btn" (click)="resetPinToAddress()" [disabled]="locationEditPinResetting || aoSaving">
+          <ion-spinner *ngIf="locationEditPinResetting" name="crescent"></ion-spinner>
+          {{ locationEditPinResetting ? 'Locating…' : 'Reset pin from address' }}
+        </button>
+      </div>
+      <div class="save-error" *ngIf="locationEditCoordError">{{ locationEditCoordError }}</div>
+
+      <div class="save-error" *ngIf="aoSaveError">{{ aoSaveError }}</div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" (click)="saveLocationFromModal()" [disabled]="aoSaving || !!locationEditCoordError">
+          {{ aoSaving ? 'Saving…' : 'Save' }}
+        </button>
+        <button class="btn-cancel" (click)="closeLocationEditModal()" [disabled]="aoSaving">Cancel</button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

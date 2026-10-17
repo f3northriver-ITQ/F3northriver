@@ -1,0 +1,422 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+      <app-sidebar-toggle class="custom-back"></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>{{ displayName || 'Loading...' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [routerLink]="kotterRoute">Kotter</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-date-range-picker
+    [selectedRange]="selectedRange"
+    (rangeChange)="onDateRangeChange($event)">
+  </app-date-range-picker>
+
+  <div *ngIf="aoStats; else loading">
+
+    <!-- cool year grid chart (attendance heatmap), like the PAX page -->
+    <app-year-grid
+      [bds]="yearGridBds"
+      *ngIf="yearGridBds && yearGridBds.length > 0">
+    </app-year-grid>
+
+    <ng-container *ngIf="aoStats.totalBeatdowns > 0; else empty">
+      <!-- ao stats -->
+      <div class="card-grid wide">
+        <div class="card-container">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{ displayName }} stats</ion-card-title>
+            </ion-card-header>
+            <ion-list class="stats-list">
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  <h2>Total {{ bbShort }}s</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.totalBeatdowns }} <strong>({{ aoStats.totalPosts }} posts)</strong>
+                </span>
+              </ion-item>
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  <h2>Avg Attendance</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.averageAttendance | number:'0.1-1' }} PAX per {{ bbSingular }}
+                </span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.record">
+                <ion-label class="ion-text-wrap">
+                  <h2>Record Attendance</h2>
+                </ion-label>
+                <span slot="end">
+                  <a routerLink="/backblasts/{{ aoStats.record.backblastId }}">{{ aoStats.record.count }} PAX</a>&nbsp;{{ aoStats.record.relativeDate }}<ng-container *ngIf="multiAo"> at <a routerLink="/ao/{{ aoStats.record.aoRoute }}">{{ aoStats.record.ao }}</a></ng-container>
+                </span>
+              </ion-item>
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  <h2>PAX Tally</h2>
+                </ion-label>
+                <span slot="end">{{ aoStats.totalUniquePax }} unique PAX</span>
+              </ion-item>
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  <h2>Q Tally</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.totalUniqueQs }} unique Qs
+                  <strong *ngIf="aoStats.totalUniquePax > 0">
+                    ({{ aoStats.totalUniqueQs / aoStats.totalUniquePax | percent }} of PAX)
+                  </strong>
+                </span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.totalFngs > 0">
+                <ion-label class="ion-text-wrap">
+                  <h2>FNGs Welcomed</h2>
+                </ion-label>
+                <span slot="end">{{ aoStats.totalFngs }} FNG{{ aoStats.totalFngs === 1 ? '' : 's' }}</span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.topQ">
+                <ion-label class="ion-text-wrap">
+                  <h2>Top Q</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.topQ.qs }} Q{{ aoStats.topQ.qs === 1 ? '' : 's' }} by
+                  <a routerLink="/pax/{{ aoStats.topQ.name }}">{{ utilService.normalizeName(aoStats.topQ.name) }}</a>
+                </span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.topDuo" button (click)="showTopDuos()">
+                <ion-label class="ion-text-wrap">
+                  <h2>Dynamic Duo <ion-icon name="information-circle-outline" size="small" class="info-icon"></ion-icon></h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.topDuo.count }} {{ bbShort }}s together:
+                  <a routerLink="/pax/{{ aoStats.topDuo.name1 }}" (click)="$event.stopPropagation()">{{ utilService.normalizeName(aoStats.topDuo.name1) }}</a>
+                  &amp;
+                  <a routerLink="/pax/{{ aoStats.topDuo.name2 }}" (click)="$event.stopPropagation()">{{ utilService.normalizeName(aoStats.topDuo.name2) }}</a>
+                </span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.firstBd">
+                <ion-label class="ion-text-wrap">
+                  <h2>First {{ bbShort }}</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.firstBd.relativeDate }}<ng-container *ngIf="multiAo"> at <a routerLink="/ao/{{ aoStats.firstBd.aoRoute }}">{{ aoStats.firstBd.ao }}</a></ng-container>
+                </span>
+              </ion-item>
+              <ion-item *ngIf="aoStats.lastBd">
+                <ion-label class="ion-text-wrap">
+                  <h2>Most Recent {{ bbShort }}</h2>
+                </ion-label>
+                <span slot="end">
+                  {{ aoStats.lastBd.relativeDate }}<ng-container *ngIf="multiAo"> at <a routerLink="/ao/{{ aoStats.lastBd.aoRoute }}">{{ aoStats.lastBd.ao }}</a></ng-container>
+                </span>
+              </ion-item>
+            </ion-list>
+          </ion-card>
+        </div>
+
+        <!-- most popular aos, the region analog of the PAX page's favorite aos -->
+        <div class="card-container" *ngIf="popularAos.length > 1">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Most Popular AOs</ion-card-title>
+              <ion-card-subtitle>By total {{ bbPlural }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-list>
+              <ion-item *ngFor="let ao of popularAos | slice:0:(showMorePopularAos ? popularAos.length : limit)">
+                <ion-label class="ion-text-wrap">
+                  <h2><a routerLink="/ao/{{ ao.route }}">{{ ao.name }}</a></h2>
+                  <p>{{ ao.avgAttendance | number:'0.1-1' }} PAX per {{ bbSingular }}</p>
+                </ion-label>
+                <strong slot="end">{{ ao.bds }} {{ ao.bds === 1 ? bbSingular : bbPlural }}</strong>
+              </ion-item>
+              <ion-button
+                *ngIf="popularAos.length > limit"
+                class="show-more has-more"
+                fill="clear"
+                expand="block"
+                (click)="showMorePopularAos = !showMorePopularAos"
+              >
+                <ng-container *ngIf="!showMorePopularAos; else showLess">
+                  Show all {{ popularAos.length }}
+                </ng-container>
+              </ion-button>
+            </ion-list>
+          </ion-card>
+        </div>
+      </div>
+
+      <!-- snapshot row: q depth + day-of-week heatmap -->
+      <div class="snapshot-grid">
+        <ion-card class="snapshot-card snapshot-q-depth">
+          <ion-card-header>
+            <ion-card-title>Q Depth per AO</ion-card-title>
+            <ion-card-subtitle>
+              Of the regulars at each AO (showed up to ⅓ of workouts in 90 days), what share Q'd at least half their fair share? Low depth means a site is propped up by a small handful of contributors — key-man risk.
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <app-q-depth-chart [data]="qDepthRows"></app-q-depth-chart>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="snapshot-card snapshot-dow">
+          <ion-card-header>
+            <ion-card-title>Day-of-Week Attendance</ion-card-title>
+            <ion-card-subtitle>
+              Average PAX per AO per day of week, trailing 90 days. Darker cells mean higher average attendance.
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <app-day-of-week-heatmap [data]="dowRows"></app-day-of-week-heatmap>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <div class="card-grid wide">
+        <!-- leaderboard -->
+        <div class="card-container">
+          <ion-card>
+            <ion-card-header>
+              <div class="card-header-content">
+                <div>
+                  <ion-card-title>Leaderboard</ion-card-title>
+                  <ion-card-subtitle>Posted at the most {{ bbShort }}s</ion-card-subtitle>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="toggle-button"
+                  (click)="toggleLeaderboardView()">
+                  <ion-icon
+                    [name]="leaderboardViewByBdsPerWeek ? 'time-outline' : 'bar-chart-outline'"
+                    slot="start">
+                  </ion-icon>
+                  <span>{{ leaderboardViewByBdsPerWeek ? 'BDs per week' : 'Total BDs' }}</span>
+                </ion-button>
+              </div>
+            </ion-card-header>
+            <ion-list>
+              <app-pax-list-item
+                *ngFor="let pax of leaderboard; let i = index"
+                [pax]="pax"
+                [index]="i"
+                [showMore]="showMoreLeaderboard"
+                [subtext]="leaderboardViewByBdsPerWeek ?
+                  (pax.bds + ' ' + (pax.bds === 1 ? bbSingular : bbPlural)) :
+                  (pax.bdsPerWeek | number:'0.0-2') + ' ' + (pax.bdsPerWeek === 1 ? bbSingular : bbPlural) + ' per week'"
+                [metric]="leaderboardViewByBdsPerWeek ?
+                  ((pax.bdsPerWeek | number:'0.0-2') + ' ' + (pax.bdsPerWeek === 1 ? bbSingular : bbPlural) + ' per week') :
+                  (pax.bds + ' ' + (pax.bds === 1 ? bbSingular : bbPlural))"
+                (click)="goToPaxPage(pax.name)">
+              </app-pax-list-item>
+
+              <ion-button
+                class="show-more"
+                [class.has-4]="leaderboard.length > 3"
+                [class.has-more]="leaderboard.length > limit"
+                fill="clear"
+                expand="block"
+                (click)="showMoreLeaderboard = !showMoreLeaderboard"
+              >
+                <ng-container *ngIf="!showMoreLeaderboard; else showLess">
+                  Show all {{ leaderboard.length }}
+                </ng-container>
+              </ion-button>
+            </ion-list>
+          </ion-card>
+        </div>
+
+        <!-- top qs -->
+        <div class="card-container">
+          <ion-card>
+            <ion-card-header>
+              <div class="card-header-content">
+                <div>
+                  <ion-card-title>Top Qs</ion-card-title>
+                  <ion-card-subtitle>Takes the Q the most<ng-container *ngIf="qListMinBds > 1">, among PAX with {{ qListMinBds }}+ posts</ng-container></ion-card-subtitle>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="toggle-button"
+                  (click)="toggleTopQsView()">
+                  <ion-icon
+                    [name]="topQsViewByPercentage ? 'pie-chart-outline' : 'bar-chart-outline'"
+                    slot="start">
+                  </ion-icon>
+                  <span>{{ topQsViewByPercentage ? 'Percentage' : 'Total BDs (Qd)' }}</span>
+                </ion-button>
+              </div>
+            </ion-card-header>
+            <ion-list>
+              <app-pax-list-item
+                *ngFor="let q of topQs; let i = index"
+                [pax]="q"
+                [index]="i"
+                [showMore]="showMoreTop"
+                [subtext]="topQsViewByPercentage ?
+                  ('Led ' + q.qs + ' / ' + q.bds) :
+                  ('Led ' + q.qs + ' / ' + q.bds + ' (' + (q.qRate | percent) + ')')"
+                [metric]="topQsViewByPercentage ?
+                  ((q.qRate | percent) || '0%') :
+                  (q.qs + ' ' + (q.qs === 1 ? bbSingular : bbPlural))"
+                (click)="goToPaxPage(q.name)">
+              </app-pax-list-item>
+
+              <ion-button
+                class="show-more"
+                [class.has-4]="topQs.length > 3"
+                [class.has-more]="topQs.length > limit"
+                fill="clear"
+                expand="block"
+                (click)="showMoreTop = !showMoreTop"
+              >
+                <ng-container *ngIf="!showMoreTop; else showLess">
+                  Show all {{ topQs.length }}
+                </ng-container>
+              </ion-button>
+            </ion-list>
+          </ion-card>
+        </div>
+
+        <!-- bottom qs -->
+        <div class="card-container">
+          <ion-card>
+            <ion-card-header>
+              <div class="card-header-content">
+                <div>
+                  <ion-card-title>Bottom Qs</ion-card-title>
+                  <ion-card-subtitle>Takes the Q the least<ng-container *ngIf="qListMinBds > 1">, among PAX with {{ qListMinBds }}+ posts</ng-container></ion-card-subtitle>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="toggle-button"
+                  (click)="toggleBottomQsView()">
+                  <ion-icon
+                    [name]="bottomQsViewByPercentage ? 'pie-chart-outline' : 'bar-chart-outline'"
+                    slot="start">
+                  </ion-icon>
+                  <span>{{ bottomQsViewByPercentage ? 'Percentage' : 'Total BDs (Qd)' }}</span>
+                </ion-button>
+              </div>
+            </ion-card-header>
+            <ion-list>
+              <app-pax-list-item
+                *ngFor="let q of bottomQs; let i = index"
+                [pax]="q"
+                [index]="i"
+                [showMore]="showMoreBottom"
+                [subtext]="bottomQsViewByPercentage ?
+                  ('Led ' + q.qs + ' / ' + q.bds) :
+                  ('Led ' + q.qs + ' / ' + q.bds + ' (' + (q.qRate | percent) + ')')"
+                [metric]="bottomQsViewByPercentage ?
+                  ((q.qRate | percent) || '0%') :
+                  (q.qs + ' ' + (q.qs === 1 ? bbSingular : bbPlural))"
+                (click)="goToPaxPage(q.name)">
+              </app-pax-list-item>
+
+              <ion-button
+                class="show-more"
+                [class.has-4]="bottomQs.length > 3"
+                [class.has-more]="bottomQs.length > limit"
+                fill="clear"
+                expand="block"
+                (click)="showMoreBottom = !showMoreBottom"
+              >
+                <ng-container *ngIf="!showMoreBottom; else showLess">
+                  Show all {{ bottomQs.length }}
+                </ng-container>
+              </ion-button>
+            </ion-list>
+          </ion-card>
+        </div>
+
+        <!-- no qs -->
+        <div class="card-container">
+          <ion-card>
+            <ion-card-header>
+              <div class="card-header-content">
+                <div>
+                  <ion-card-title>Has not been the Q</ion-card-title>
+                  <ion-card-subtitle>Lead 0 {{ bbPlural }}</ion-card-subtitle>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="toggle-button"
+                  (click)="toggleNoQsView()">
+                  <ion-icon
+                    [name]="noQsViewByLastBd ? 'calendar-outline' : 'bar-chart-outline'"
+                    slot="start">
+                  </ion-icon>
+                  <span>{{ noQsViewByLastBd ? 'Last BD' : 'Total BDs' }}</span>
+                </ion-button>
+              </div>
+            </ion-card-header>
+            <ion-list>
+              <app-pax-list-item
+                *ngFor="let q of noQs; let i = index"
+                [pax]="q"
+                [index]="i"
+                [showMore]="showMoreNoQs"
+                [subtext]="noQsViewByLastBd ?
+                  (q.bds + ' ' + (q.bds === 1 ? bbSingular : bbPlural)) :
+                  ('Last ' + bbShort + ' was ' + (q.lastBdRelativeDate || ''))"
+                [metric]="noQsViewByLastBd ?
+                  ('Last ' + bbShort + ' was ' + (q.lastBdRelativeDate || '')) :
+                  (q.bds + ' ' + (q.bds === 1 ? bbSingular : bbPlural))"
+                (click)="goToPaxPage(q.name)">
+              </app-pax-list-item>
+
+              <ion-button
+                class="show-more"
+                [class.has-4]="noQs.length > 3"
+                [class.has-more]="noQs.length > limit"
+                fill="clear"
+                expand="block"
+                (click)="showMoreNoQs = !showMoreNoQs"
+              >
+                <ng-container *ngIf="!showMoreNoQs; else showLess">
+                  Show all {{ noQs.length }}
+                </ng-container>
+              </ion-button>
+            </ion-list>
+          </ion-card>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- recent backblasts -->
+  <app-backblast-grid [backblasts]="recentBds"></app-backblast-grid>
+
+</ion-content>
+
+<!-- loading spinner -->
+<ng-template #loading>
+  <div class="spinner-container">
+    <h2>Loading...</h2>
+    <ion-spinner></ion-spinner>
+  </div>
+</ng-template>
+
+<!-- empty state -->
+<ng-template #empty>
+  <div class="empty-container">
+    No data for AO "{{ displayName }}"
+  </div>
+</ng-template>
+
+<!-- show less button text -->
+<ng-template #showLess>
+  Show less
+</ng-template>

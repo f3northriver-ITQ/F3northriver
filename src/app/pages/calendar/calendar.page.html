@@ -1,0 +1,34 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>F3 North River Calendar</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        color="primary"
+        fill="clear"
+        (click)="addEvent()"
+      >
+        Add event
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <app-workouts-nav></app-workouts-nav>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="calendar-container">
+    <iframe
+      src="https://embed.styledcalendar.com/#JwJEmirxF8Pwq77VxxKQ"
+      title="Styled Calendar"
+      class="styled-calendar-container"
+      style="width: 100%; height: 100%; border: none;"
+      data-cy="calendar-embed-iframe">
+    </iframe>
+    <script async type="module" src="https://embed.styledcalendar.com/assets/parent-window.js"></script>
+  </div>
+</ion-content>

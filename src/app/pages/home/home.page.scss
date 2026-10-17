@@ -1,0 +1,54 @@
+.main-img {
+  background-image: url('../../../assets/home.jpeg');
+}
+
+.core-principles {
+  background-image: url('../../../assets/principles.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+
+  .priciples-container {
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+
+    .principle {
+      flex: 1;
+      margin: 30px 0;
+
+      h2 {
+        white-space: nowrap;
+      }
+
+      ion-icon {
+        font-size: 40px;
+        margin: auto;
+        border: 2px solid #ee6059;
+        padding: 16px;
+        border-radius: 50%;
+        color: #ee6059;
+      }
+
+      ion-text {
+        height: 40px;
+      }
+    }
+  }
+}
+
+@media (max-width: 1150px) {
+  .priciples-container {
+    .space-between {
+      flex-wrap: wrap;
+      justify-content: center;
+
+      .principle {
+        min-width: 260px;
+        max-width: 260px;
+        margin: 20px 20px 0;
+      }
+    }
+  }
+}

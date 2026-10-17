@@ -1,0 +1,9 @@
+.calendar-container {
+  height: 100%;
+
+  @media (prefers-color-scheme: dark) {
+    iframe {
+      filter: invert(.9) saturate(0.5) hue-rotate(145deg);
+    }
+  }
+}

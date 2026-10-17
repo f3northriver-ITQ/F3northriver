@@ -1,0 +1,113 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>Q Line-up</ion-title>
+    <div slot="end">
+      <ion-searchbar
+        mode="ios"
+        class="desktop-toolbar"
+        [(ngModel)]="filterText"
+        placeholder="Filter by PAX"
+        (ionChange)="applyFilter()">
+      </ion-searchbar>
+    </div>
+  </ion-toolbar>
+  <ion-toolbar>
+    <app-workouts-nav></app-workouts-nav>
+  </ion-toolbar>
+  <ion-toolbar class="mobile-toolbar">
+    <ion-searchbar
+      mode="ios"
+      [(ngModel)]="filterText"
+      placeholder="Filter by PAX"
+      (ionChange)="applyFilter()">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="lineup">
+    <!-- how to sign up, and what the colours mean -->
+    <div class="lineup-intro">
+      <div class="lineup-intro-text">
+        <h1>Who's got the Q</h1>
+        <p>
+          Tap an open slot to claim it in Slack, or run
+          <a href="https://docs.google.com/document/d/1hPpxsF7Zi2frYCTAs4skRielxEF23XcSSdXpje-LMzM" target="_blank" rel="noopener">/post-q-sheet</a>
+          in the AO channel.
+        </p>
+        <div class="legend">
+          <span class="legend-item"><span class="swatch taken"></span>Q'd</span>
+          <span class="legend-item"><span class="swatch open"></span>Open</span>
+          <span class="legend-item"><span class="swatch soon"></span>Needs a Q soon</span>
+          <span class="legend-item"><span class="swatch closed"></span>Closed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-scroller" *ngIf="!everythingHidden; else nothing">
+      <table class="grid" [style.--ao-count]="visibleAoCount">
+        <thead>
+          <tr>
+            <th class="date-col">Date</th>
+            <th *ngFor="let ao of aos" [class.hidden]="ao.hidden">
+              <a routerLink="/ao/{{ ao.name }}">{{ utilService.normalizeName(ao.name) }}</a>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let row of dates"
+            [class.hidden]="row.hidden"
+            [class.today]="row.isToday"
+            [class.weekend]="row.isWeekend">
+            <th class="date-col" scope="row">
+              <span class="dow">{{ row.isToday ? 'Today' : row.dow }}</span>
+              <span class="day">{{ row.day }}</span>
+            </th>
+            <td *ngFor="let col of row.cols" [class.hidden]="col.hidden" [class.dimmed]="col.hideText">
+              <!-- the AO is closed that day -->
+              <span class="cell closed" *ngIf="col.closed">{{ col.text || 'Closed' }}</span>
+
+              <!-- someone has the Q -->
+              <ng-container *ngIf="!col.closed && col.taken">
+                <a class="cell taken" *ngFor="let q of col.qs" routerLink="/pax/{{ q.toLowerCase() }}">
+                  <app-pax-avatar [name]="q" [size]="22"></app-pax-avatar>
+                  <span class="name">{{ utilService.normalizeName(q) }}</span>
+                </a>
+              </ng-container>
+
+              <!-- the AO meets but nobody's signed up: a tap away from Slack -->
+              <button
+                type="button"
+                class="cell open"
+                [class.soon]="col.warning"
+                *ngIf="!col.closed && !col.taken && !col.transparent"
+                (click)="claim(col)">
+                <ion-icon name="logo-slack"></ion-icon>
+                {{ col.warning ? 'Needs a Q' : 'Open' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #nothing>
+      <div class="empty">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>Nothing on the line-up for "{{ filterText }}"</p>
+      </div>
+    </ng-template>
+
+    <div class="load-more">
+      <ion-button fill="outline" size="small" (click)="loadMore()">
+        Load {{ days }} more days
+        <ion-icon name="chevron-down" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

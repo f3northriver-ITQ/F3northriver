@@ -1,0 +1,77 @@
+<ion-header>
+  <app-beatdown-breakdown-banner></app-beatdown-breakdown-banner>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <app-sidebar-toggle></app-sidebar-toggle>
+    </ion-buttons>
+    <ion-title>Challenges</ion-title>
+    <ion-buttons slot="end" *ngIf="user">
+      <ion-button (click)="createChallenge()">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="challenges-container">
+    <div class="header-section" [class.showing-past]="showPastChallenges">
+      <h2 class="challenges-title">
+        <span class="title-text current">{{ showPastChallenges ? 'Past Challenges' : 'Current Challenges' }}</span>
+      </h2>
+      <a class="past-challenges-link" (click)="togglePastChallenges()">
+        <span class="link-text">{{ showPastChallenges ? 'Current Challenges' : 'Past Challenges' }}</span>
+      </a>
+      <p *ngIf="!user" class="sign-in-prompt">
+        <a (click)="openLoginModal()">Sign in</a> to create and participate in challenges.
+      </p>
+    </div>
+
+    <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+
+    <div *ngIf="!isLoading && challenges.length === 0" class="empty-state">
+      <ion-icon name="trophy-outline"></ion-icon>
+      <h3 *ngIf="!showPastChallenges">No challenges yet</h3>
+      <h3 *ngIf="showPastChallenges">No past challenges</h3>
+      <p *ngIf="!showPastChallenges && user">Be the first to create a challenge!</p>
+      <p *ngIf="!showPastChallenges && !user">Sign in to create the first challenge.</p>
+      <p *ngIf="showPastChallenges">There are no past challenges to display.</p>
+    </div>
+
+    <div *ngIf="!isLoading && challenges.length > 0" class="challenges-list">
+      <ion-card *ngFor="let challenge of challenges" class="challenge-card" (click)="goToChallenge(challenge)">
+        <ion-card-header>
+          <div class="card-header-row">
+            <div class="card-title-section">
+              <div class="title-row">
+                <ion-card-title>{{ challenge.name }}</ion-card-title>
+                <ion-chip *ngIf="challenge.isPrivate" color="medium" class="private-chip">
+                  <ion-icon name="lock-closed-outline"></ion-icon>
+                  <ion-label>Private</ion-label>
+                </ion-chip>
+              </div>
+              <ion-card-subtitle>{{ getDateRange(challenge) }}</ion-card-subtitle>
+            </div>
+            <ion-chip *ngIf="getParticipantCount(challenge.id)" class="participants-chip">
+              <ion-icon name="people-outline"></ion-icon>
+              <ion-label>{{ getParticipantCount(challenge.id) }}</ion-label>
+            </ion-chip>
+          </div>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="description">{{ challenge.description }}</p>
+          <div class="challenge-details">
+            <div class="detail-item">
+              <ion-icon name="stats-chart-outline"></ion-icon>
+              <span><strong>Tracking:</strong> {{ getMetricsList(challenge) }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon name="swap-vertical-outline"></ion-icon>
+              <span><strong>Sort by:</strong> {{ getSortByLabel(challenge) }}</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
