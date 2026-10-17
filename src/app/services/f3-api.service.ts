@@ -20,7 +20,7 @@ export const BOISE_REGION_IDS = {
  * Website URL sent on org create/update payloads — required by the Nation API
  * `website` field.
  */
-export const F3_REGION_WEBSITE_URL = 'https://f3boise.com';
+export const F3_REGION_WEBSITE_URL = 'https://f3-north-river.web.app';
 
 export type RegionId = (typeof BOISE_REGION_IDS)[keyof typeof BOISE_REGION_IDS];
 

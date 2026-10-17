@@ -1,7 +1,7 @@
 import {AO} from '../../../constants';
 
 /** The F3 North River Slack workspace. */
-export const SLACK_WORKSPACE_URL = 'https://f3-boise.slack.com';
+export const SLACK_WORKSPACE_URL = 'https://f3northriver.slack.com';
 /** The workspace's Slack team ID, which the app's deep links key on. */
 const SLACK_TEAM_ID = 'T03T5J6801Z';
 /** How long to give the Slack app to take over before falling back to the web. */
