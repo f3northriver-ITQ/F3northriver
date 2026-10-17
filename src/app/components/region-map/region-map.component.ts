@@ -53,7 +53,7 @@ export class RegionMapComponent implements OnChanges {
   error: string|null = null;
   aos: MapAo[] = [];
 
-  mapCenter: google.maps.LatLngLiteral = {lat: 43.615, lng: -116.35};
+  mapCenter: google.maps.LatLngLiteral = {lat: 35.15051815227355, lng: -85.28801393043507};
 
   readonly mapOptions: google.maps.MapOptions = {
     mapTypeId: 'roadmap',

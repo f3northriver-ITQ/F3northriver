@@ -386,7 +386,7 @@ export class MapPage implements OnInit, OnDestroy {
   /** Regions listed in New AO modal — filtered from {@link permissions}. */
   newAoRegionOptions: ReadonlyArray<{id: number; name: string}> = [];
 
-  mapCenter: google.maps.LatLngLiteral = {lat: 43.615, lng: -116.35};
+  mapCenter: google.maps.LatLngLiteral = {lat: 35.15051815227355, lng: -85.28801393043507};
   /**
    * Omit zoom — `fitBounds` sets viewport; avoids fighting programmatic
    * fitting.
